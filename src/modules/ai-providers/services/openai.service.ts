@@ -123,16 +123,22 @@ export class OpenAIService implements IAIProvider {
       );
 
       const analysisPrompts = {
-        grammar: `Analyze the following text for grammatical errors and provide corrections with explanations:
+        grammar: `Analyze the following text for important grammatical and vocabulary errors. Focus ONLY on meaningful issues that affect comprehension and language learning.
 
 Text: "${text}"
 
-Please provide:
-1. A corrected version of the text
-2. Explanation of each error found
-3. Grammar rules that apply
+IMPORTANT GUIDELINES:
+- IGNORE capitalization errors (e.g., "hi" vs "Hi")
+- IGNORE punctuation spacing (e.g., spaces before question marks)
+- IGNORE minor punctuation issues unless they severely affect meaning
+- FOCUS ON: verb tenses, subject-verb agreement, word order, vocabulary usage, prepositions, articles (a/an/the)
 
-Format your response in a clear, educational manner.`,
+Please provide:
+1. A corrected version with ONLY major grammatical/vocabulary errors fixed
+2. Explanation of each SIGNIFICANT error found (ignore capitalization/punctuation)
+3. Relevant grammar rules for major issues
+
+Focus on errors that truly impact language learning effectiveness.`,
 
         style: `Analyze the following text for writing style and provide suggestions for improvement:
 

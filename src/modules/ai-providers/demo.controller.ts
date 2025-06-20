@@ -237,8 +237,8 @@ export class DemoController {
 
         // 2. Extraire les erreurs avec patterns plus flexibles
         const errorPatterns = [
-          /(?:errors?|mistakes?):\s*(.*?)(?:\n\n|$)/is,
-          /(?:problems?|issues?):\s*(.*?)(?:\n\n|$)/is,
+          /(?:errors?|mistakes?):\s*(.*?)(?:\n\n|$)/gis,
+          /(?:problems?|issues?):\s*(.*?)(?:\n\n|$)/gis,
           /\d+\.\s+([^\n]+(?:error|mistake|wrong|incorrect)[^\n]*)/gi,
           /([^\n]*(?:should be|change to|replace with)[^\n]*)/gi,
         ];

@@ -191,6 +191,10 @@ export class AIProviderService {
         userMessage: text,
         language: context.language || "English",
         level: context.level || "intermediate",
+        additionalContext: {
+          text,
+          level: context.level || "intermediate",
+        },
       };
 
       let templateId: string;
