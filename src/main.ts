@@ -22,12 +22,18 @@ async function bootstrap() {
 
   // Security
   app.use(helmet());
+
+  // Configure CORS origins from environment variables
+  const corsOrigins = configService.get<string>("CORS_ALLOWED_ORIGINS")?.split(",") || [
+    "http://localhost:3000", // Frontend service (default)
+    "http://localhost:3001", // DB service (default)
+    "http://localhost:3002", // Auth service (default)
+  ];
+
+  logger.log(`🌐 CORS configured with origins: ${corsOrigins.join(", ")}`);
+
   app.enableCors({
-    origin: [
-      "http://localhost:3000", // Frontend service
-      "http://localhost:3001", // DB service
-      "http://localhost:3002", // Auth service
-    ],
+    origin: corsOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
