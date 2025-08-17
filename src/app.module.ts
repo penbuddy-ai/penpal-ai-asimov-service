@@ -7,6 +7,7 @@ import { AIProvidersModule } from "./modules/ai-providers/ai-providers.module";
 import { CacheModule } from "./modules/cache/cache.module";
 import { ConversationsModule } from "./modules/conversations/conversations.module";
 import { HealthModule } from "./modules/health/health.module";
+import { MetricsModule } from "./modules/metrics/metrics.module";
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { HealthModule } from "./modules/health/health.module";
     // Modules applicatifs
     CommonModule,
     HealthModule,
+    MetricsModule,
     ConversationsModule,
     AIProvidersModule,
   ],

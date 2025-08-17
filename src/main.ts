@@ -1,11 +1,16 @@
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
-import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from "@nestjs/swagger";
+import {
+  DocumentBuilder,
+  SwaggerCustomOptions,
+  SwaggerModule,
+} from "@nestjs/swagger";
 import * as compression from "compression";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
+import { MetricsInterceptor } from "./common/interceptors/metrics.interceptor";
 
 async function bootstrap() {
   const logger = new Logger("AI Service");
@@ -59,9 +64,14 @@ async function bootstrap() {
       transform: true,
       forbidNonWhitelisted: true,
       forbidUnknownValues: true,
-      disableErrorMessages: configService.get<boolean>("api.validation.disableErrorMessages") || false,
+      disableErrorMessages:
+        configService.get<boolean>("api.validation.disableErrorMessages")
+        || false,
     }),
   );
+
+  // Global Interceptors - Metrics
+  app.useGlobalInterceptors(app.get(MetricsInterceptor));
 
   // Global prefix
   const prefix = configService.get<string>("API_PREFIX") || "/api";
@@ -72,7 +82,8 @@ async function bootstrap() {
   // Documentation
   const config = new DocumentBuilder()
     .setTitle("Penpal AI - AI Service")
-    .setDescription(`
+    .setDescription(
+      `
       Service IA pour l'application Penpal AI.
       
       ## Caractéristiques
@@ -92,17 +103,11 @@ async function bootstrap() {
       ## Configuration
       
       Consultez le fichier README.md pour plus d'informations.
-    `)
+    `,
+    )
     .setVersion("1.0.0")
-    .setContact(
-      "Penpal AI Team",
-      "https://penpal.ai",
-      "support@penpal.ai",
-    )
-    .setLicense(
-      "MIT",
-      "https://opensource.org/licenses/MIT",
-    )
+    .setContact("Penpal AI Team", "https://penpal.ai", "support@penpal.ai")
+    .setLicense("MIT", "https://opensource.org/licenses/MIT")
     .addTag("conversations", "Gestion des conversations IA")
     .addTag("ai-providers", "Intégration fournisseurs IA")
     .addTag("corrections", "Corrections linguistiques")
@@ -137,7 +142,9 @@ async function bootstrap() {
   // Start server
   await app.listen(configService.get<number>("PORT") || 3003);
   logger.log(`Application is running on: ${await app.getUrl()}`);
-  logger.log(`API documentation available at: ${await app.getUrl()}${globalPrefix}/docs`);
+  logger.log(
+    `API documentation available at: ${await app.getUrl()}${globalPrefix}/docs`,
+  );
   logger.log("AI Service is ready to accept connections");
 }
 

@@ -21,6 +21,8 @@ export type AICompletionResponse = {
   };
   model: string;
   finishReason?: string;
+  provider?: string;
+  cost?: number;
 };
 
 export type IAIProvider = {
