@@ -97,15 +97,21 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "modules/metrics/metrics.controller.ts",
-      "modules/metrics/metrics.service.ts"
+      "**/*.{ts,js}",
+      "!**/*.d.ts",
+      "!**/*.spec.ts",
+      "!**/*.e2e-spec.ts",
+      "!**/node_modules/**",
+      "!**/dist/**",
+      "!**/interfaces/**",
+      "!**/dto/**",
+      "!main.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "conversations.service.spec.ts"
-    ]
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   },
   "lint-staged": {
     "*": "npm run lint"
