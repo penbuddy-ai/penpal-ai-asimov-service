@@ -35,10 +35,10 @@ describe("serviceAuthGuard", () => {
     // Setup default config mocks
     configService.get.mockImplementation((key: string) => {
       switch (key) {
-        case "DB_SERVICE_API_KEY":
+        case "AI_SERVICE_API_KEY":
           return "test-api-key";
         case "ALLOWED_SERVICES":
-          return "frontend-service,auth-service";
+          return "frontend-service,frontend-app,auth-service";
         default:
           return undefined;
       }
@@ -74,6 +74,27 @@ describe("serviceAuthGuard", () => {
       const context = createMockExecutionContext({
         "x-api-key": "test-api-key",
         "x-service-name": "frontend-service",
+      });
+
+      const result = await freshGuard.canActivate(context);
+
+      expect(result).toBe(true);
+    });
+
+    it("should allow access with valid API key and frontend-app service", async () => {
+      // Create a fresh instance to test constructor logic properly
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          ServiceAuthGuard,
+          { provide: ConfigService, useValue: configService },
+        ],
+      }).compile();
+
+      const freshGuard = module.get<ServiceAuthGuard>(ServiceAuthGuard);
+
+      const context = createMockExecutionContext({
+        "x-api-key": "test-api-key",
+        "x-service-name": "frontend-app",
       });
 
       const result = await freshGuard.canActivate(context);
@@ -127,10 +148,10 @@ describe("serviceAuthGuard", () => {
       // Create guard with no API key configured
       configService.get.mockImplementation((key: string) => {
         switch (key) {
-          case "DB_SERVICE_API_KEY":
+          case "AI_SERVICE_API_KEY":
             return "";
           case "ALLOWED_SERVICES":
-            return "frontend-service,auth-service";
+            return "frontend-service,frontend-app,auth-service";
           default:
             return undefined;
         }
@@ -160,7 +181,7 @@ describe("serviceAuthGuard", () => {
     it("should use default allowed services when not configured", async () => {
       configService.get.mockImplementation((key: string) => {
         switch (key) {
-          case "DB_SERVICE_API_KEY":
+          case "AI_SERVICE_API_KEY":
             return "test-api-key";
           case "ALLOWED_SERVICES":
             return undefined; // Not configured
@@ -182,6 +203,37 @@ describe("serviceAuthGuard", () => {
       const context = createMockExecutionContext({
         "x-api-key": "test-api-key",
         "x-service-name": "frontend-service", // Should be in default allowed services
+      });
+
+      const result = await guard.canActivate(context);
+
+      expect(result).toBe(true);
+    });
+
+    it("should use default allowed services when not configured - frontend-app", async () => {
+      configService.get.mockImplementation((key: string) => {
+        switch (key) {
+          case "AI_SERVICE_API_KEY":
+            return "test-api-key";
+          case "ALLOWED_SERVICES":
+            return undefined; // Not configured
+          default:
+            return undefined;
+        }
+      });
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          ServiceAuthGuard,
+          { provide: ConfigService, useValue: configService },
+        ],
+      }).compile();
+
+      guard = module.get<ServiceAuthGuard>(ServiceAuthGuard);
+
+      const context = createMockExecutionContext({
+        "x-api-key": "test-api-key",
+        "x-service-name": "frontend-app", // Should be in default allowed services
       });
 
       const result = await guard.canActivate(context);

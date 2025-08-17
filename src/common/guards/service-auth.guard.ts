@@ -9,11 +9,11 @@ export class ServiceAuthGuard implements CanActivate {
   private readonly allowedServices: string[];
 
   constructor(private configService: ConfigService) {
-    this.apiKey = this.configService.get<string>("DB_SERVICE_API_KEY") || "";
-    this.allowedServices = this.configService.get<string>("ALLOWED_SERVICES")?.split(",") || ["frontend-service", "auth-service"];
+    this.apiKey = this.configService.get<string>("AI_SERVICE_API_KEY") || "";
+    this.allowedServices = this.configService.get<string>("ALLOWED_SERVICES")?.split(",") || ["frontend-service", "frontend-app", "auth-service"];
 
     if (!this.apiKey) {
-      this.logger.warn("DB_SERVICE_API_KEY is not set. Service authentication is disabled!");
+      this.logger.warn("AI_SERVICE_API_KEY is not set. Service authentication is disabled!");
     }
   }
 
