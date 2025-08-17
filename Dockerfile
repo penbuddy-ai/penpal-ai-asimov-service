@@ -1,74 +1,68 @@
-# Dockerfile multi-stage pour le AI Service
-FROM node:18-alpine AS base
+# Build stage
+FROM node:20-alpine AS builder
 
-# Install dependencies nécessaires
-RUN apk add --no-cache libc6-compat
+WORKDIR /usr/src/app
 
-# Stage de développement
-FROM base AS development
-
-WORKDIR /app
-
-# Copier les fichiers de configuration des dépendances
+# Install dependencies first (better caching)
 COPY package*.json ./
-
-# Installer toutes les dépendances (dev + prod)
 RUN npm ci
 
-# Copier le code source
+# Copy source code
 COPY . .
 
-# Exposer le port
-EXPOSE 3003
-
-# Commande par défaut pour le développement
-CMD ["npm", "run", "start:dev"]
-
-# Stage de build
-FROM base AS builder
-
-WORKDIR /app
-
-# Copier les fichiers de configuration
-COPY package*.json ./
-COPY tsconfig*.json ./
-COPY nest-cli.json ./
-
-# Installer toutes les dépendances
-RUN npm ci
-
-# Copier le code source
-COPY src ./src
-
-# Build de l'application
+# Build application
 RUN npm run build
 
-# Stage de production
-FROM base AS production
+# Development stage
+FROM node:20-alpine AS development
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Créer un utilisateur non-root
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nestjs
-
-# Copier les fichiers de configuration
+# Install all dependencies (including dev dependencies)
 COPY package*.json ./
+RUN npm install
 
-# Installer uniquement les dépendances de production
-RUN npm ci --only=production && npm cache clean --force
+# Copy source code
+COPY . .
 
-# Copier les fichiers buildés depuis le stage builder
-COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-
-# Créer les dossiers de logs avec les bonnes permissions
-RUN mkdir -p logs && chown -R nestjs:nodejs logs
-
-# Changer vers l'utilisateur non-root
-USER nestjs
-
-# Exposer le port
+# Expose port
 EXPOSE 3003
 
-# Commande par défaut
+# Start application in development mode
+CMD ["npm", "run", "start:dev"]
+
+# Production stage
+FROM node:20-alpine AS production
+
+# Add non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Set environment variables
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV} \
+    PORT=3003
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Copy package files
+COPY package*.json ./
+
+# Install production dependencies only
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+
+# Copy built application from builder
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Set permissions
+RUN chown -R appuser:appgroup /usr/src/app
+
+# Switch to non-root user
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/api/v1/health || exit 1
+
+# Start application
 CMD ["node", "dist/main"] 

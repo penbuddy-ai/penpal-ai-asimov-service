@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ThrottlerModule } from "@nestjs/throttler";
 
 import { CommonModule } from "./common/common.module";
+import { AIProvidersModule } from "./modules/ai-providers/ai-providers.module";
 import { CacheModule } from "./modules/cache/cache.module";
 import { ConversationsModule } from "./modules/conversations/conversations.module";
 import { HealthModule } from "./modules/health/health.module";
@@ -31,6 +32,7 @@ import { HealthModule } from "./modules/health/health.module";
     CommonModule,
     HealthModule,
     ConversationsModule,
+    AIProvidersModule,
   ],
 })
 export class AppModule {}
