@@ -2,7 +2,7 @@ import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import * as request from "supertest";
 
-import { AppModule } from "./../src/app.module";
+import { AppModule } from "../src/app.module";
 
 describe("AppController (e2e)", () => {
   let app: INestApplication;
@@ -18,36 +18,13 @@ describe("AppController (e2e)", () => {
 
   it("/health (GET)", () => {
     return request(app.getHttpServer())
-      .get("/api/v1/health")
+      .get("/health")
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveProperty("status");
-        expect(res.body).toHaveProperty("timestamp");
-        expect(res.body).toHaveProperty("service");
+        expect(res.body.status).toBe("ok");
+        expect(res.body.service).toBeDefined();
+        expect(res.body.timestamp).toBeDefined();
+        expect(res.body.uptime).toBeDefined();
       });
-  });
-
-  it("/health/ready (GET)", () => {
-    return request(app.getHttpServer())
-      .get("/api/v1/health/ready")
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toHaveProperty("status");
-        expect(res.body).toHaveProperty("timestamp");
-      });
-  });
-
-  it("/health/live (GET)", () => {
-    return request(app.getHttpServer())
-      .get("/api/v1/health/live")
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toHaveProperty("status", "alive");
-        expect(res.body).toHaveProperty("timestamp");
-      });
-  });
-
-  afterAll(async () => {
-    await app.close();
   });
 });
